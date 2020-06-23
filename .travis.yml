@@ -1,0 +1,43 @@
+language: bash
+
+dist: bionic
+
+env:
+  - DOCKER_CLI_EXPERIMENTAL=enabled BUILDX_VER=v0.4.1 VERSION=latest
+
+before_install:
+  - sudo rm -rf /var/lib/apt/lists/*
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  - lsb_release -cs
+  - sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) edge"
+  - sudo apt-get update
+  - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
+  - sudo apt-get install -y qemu-user-static
+  - docker run --rm --privileged multiarch/qemu-user-static:register --reset
+  
+
+
+script:
+  - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+  - docker version
+  - mkdir -vp ~/.docker/cli-plugins/ ~/dockercache
+  - curl --silent -L "https://github.com/docker/buildx/releases/download/${BUILDX_VER}/buildx-${BUILDX_VER}.linux-amd64" > ~/.docker/cli-plugins/docker-buildx
+  - chmod a+x ~/.docker/cli-plugins/docker-buildx
+  - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+  - docker buildx create --name builder --driver docker-container --use
+  - docker buildx inspect --bootstrap
+  - VERSION=$(cat ./VERSION)
+  - VERSIONARRAY=(`echo $VERSION | tr '.' ' '`)
+  - GITHASH=$(git rev-parse --short HEAD)
+  - docker buildx build 
+                 --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` 
+                 --build-arg VCS_REF=${GITHASH}
+                 --build-arg VERSION=${VERSION} 
+                 --build-arg VCS_URL=${VCS_URL}
+                 --push 
+                 --platform linux/arm/v7,linux/arm64/v8,linux/386,linux/amd64 
+                 -t ${DOCKER_REPOSITORIE}:latest 
+                 -t ${DOCKER_REPOSITORIE}:v.${VERSIONARRAY[0]}.${VERSIONARRAY[1]}.${VERSIONARRAY[2]}
+                 -t ${DOCKER_REPOSITORIE}:v.${VERSIONARRAY[0]}.${VERSIONARRAY[1]}
+                 -t ${DOCKER_REPOSITORIE}:v.${VERSIONARRAY[0]}
+                 .

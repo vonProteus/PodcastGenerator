@@ -1,4 +1,7 @@
 # Podcast Generator
+[![Build Status](https://travis-ci.org/vonProteus/PodcastGenerator.svg?branch=master)](https://travis-ci.org/vonProteus/PodcastGenerator)
+[![](https://images.microbadger.com/badges/image/vonproteus/podcast-generator.svg)](https://microbadger.com/images/vonproteus/podcast-generator "Get your own image badge on microbadger.com")
+
 
 Podcast Generator (PG) is an open source Content Management System written in PHP 
 and specifically designed for podcast publishing. It provides the user with the tools 

@@ -2,6 +2,19 @@ FROM php:7-apache
 
 ENV APACHE_DOCUMENT_ROOT /app/PodcastGenerator
 
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VCS_URL
+ARG VERSION
+LABEL org.label-schema.build-date=$BUILD_DATE \
+      org.label-schema.name="Podcast Generator" \
+      org.label-schema.description="Podcast Generator is an open source CMS written in PHP and specifically designed for podcast publishing. It provides the user with the tools to easily manage all of the aspects related to the publication of a podcast, from the upload of episodes to its submission to the iTunes store." \
+      org.label-schema.url="http://podcastgenerator.net" \
+      org.label-schema.vcs-ref=$VCS_REF \
+      org.label-schema.vcs-url=$VCS_URL \
+      org.label-schema.version=$VERSION \
+      org.label-schema.schema-version="1.0"
+
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
     && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
     && apt-get update \
